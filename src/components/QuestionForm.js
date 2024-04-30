@@ -1,26 +1,43 @@
 import React, { useState } from "react";
 
-function QuestionForm(props) {
+function QuestionForm({ onQuestionAdded }) {
   const [formData, setFormData] = useState({
     prompt: "",
-    answer1: "",
-    answer2: "",
-    answer3: "",
-    answer4: "",
+    answers: ["", "", "", ""],
     correctIndex: 0,
   });
 
   function handleChange(event) {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    const {name, value} = event.target;
+    if (name === "answers") {
+      const answers = [...formData.answers];
+      answers[event.target.dataset.index] = value;
+      setFormData({...formData, answers: answers});
+
+    } else {
+      setFormData({...formData, [name]: value});
+    }
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log(formData);
-  }
+    fetch("http://localhost:4000/questions", {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(formData),
+
+    })
+
+      .then((response) => response.json())
+      .then((newQuestion) => 
+        onQuestionAdded(newQuestion))
+         setFormData("")
+
+      }
+  
 
   return (
     <section>
@@ -54,7 +71,7 @@ function QuestionForm(props) {
           />
         </label>
         <label>
-          Answer 3:
+        Answer 3:
           <input
             type="text"
             name="answer3"
